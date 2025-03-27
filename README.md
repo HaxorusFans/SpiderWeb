@@ -57,7 +57,7 @@ public class TestClass: FolderMonitorDelegate{
 
 ```swift
 struct ContentView: View {
-    var t = TestClass(sw: SpiderWeb(location: "/your/path"))
+    var t = TestClass(sw: SpiderWeb())
     var body: some View {
         VStack {
             Image(systemName: "globe")
