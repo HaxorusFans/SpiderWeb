@@ -75,3 +75,22 @@ struct ContentView: View {
 }
 ```
 
+### **App Store Submission Requirements**
+
+For `SpiderWeb` to function properly in sandboxed environments (required for Mac App Store distribution), the host application must include these configurations:
+
+#### **Entitlements File Configuration**
+
+Add the following to your app's `.entitlements` file (typically `YourAppName.entitlements`):
+
+```xml
+<key>com.apple.security.app-sandbox</key>
+<true/>
+<key>com.apple.security.files.user-selected.read-write</key>
+<true/>
+<key>com.apple.security.files.bookmarks.app-scope</key>
+<true/>
+```
+
+**Note for SpiderWeb Users(Spider-Men?)**:
+These configurations must be implemented in the *host application*, not in the SpiderWeb package itself. See the example project for a complete implementation reference.

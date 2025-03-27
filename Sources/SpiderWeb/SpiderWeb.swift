@@ -14,7 +14,11 @@ public class SpiderWebBookmarkManager {
     @MainActor static func saveBookmarks(url: URL) -> Bool {
         var arr:[Data] = []
         if let bookmark = try? url.bookmarkData(options: .withSecurityScope){
-            guard let dataArray = defaults.array(forKey: "authorizedDirectoryBookmarks") as? [Data] else { return false }
+            guard let dataArray = defaults.array(forKey: "authorizedDirectoryBookmarks") as? [Data] else {
+                arr.append(bookmark)
+                defaults.set(arr, forKey: "authorizedDirectoryBookmarks")
+                return true
+            }
             arr = dataArray
             arr.append(bookmark)
             defaults.set(arr, forKey: "authorizedDirectoryBookmarks")
@@ -50,25 +54,35 @@ public class SpiderWebBookmarkManager {
     }
 }
 
-
 public class SpiderWeb: FolderMonitorDelegate{
     public var id:UUID = UUID()
     var delegate: FolderMonitorDelegate?
-    public var location: String
-    var fm: FolderMonitor
+    public var location: URL?
+    var fm: FolderMonitor?
     
-    public init(location: String) {
-        self.location = location
-        self.fm = FolderMonitor.init(folderPath: location)
-        self.fm.delegate = self
+    public init() {
     }
     
-    public func weaveWeb(){
-        self.fm.startMonitoring()
+    @MainActor public func weaveWeb(){
+        requestDirectoryAccess { URL in
+            if let url = URL {
+                url.startAccessingSecurityScopedResource()
+                self.location = url
+                self.fm = FolderMonitor.init(folderPath: url.path)
+                self.fm!.delegate = self
+                self.fm!.startMonitoring()
+            }
+        }
+        
     }
     
     public func cleanWeb(){
-        self.fm.stopMonitoring()
+        self.fm?.stopMonitoring()
+        self.location?.stopAccessingSecurityScopedResource()
+    }
+    
+    deinit {
+        cleanWeb()
     }
     
     /// Delegate
